@@ -1,0 +1,72 @@
+version: '3'
+services:
+  serviceregistry:
+    image: 'shoaibpki/serviceregistry:0.0.1'
+    container_name: serviceregistry
+    ports:
+      - '8761:8761'
+  configserver:
+    image: 'shoaibpki/configserver:0.0.1'
+    container_name: configserver
+    ports:
+      - '9296:9296'
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://serviceregistry:8761/eureka
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://configserver:9296/actuator/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - serviceregistry
+  cloudgateway:
+    image: 'shoaibpki/cloudgateway:0.0.1'
+    container_name: cloudgateway
+    ports:
+      - '9090:9090'
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://serviceregistry:8761/eureka
+      - CONFIG_SERVER_URL=http://host.docker.internal:9296
+    depends_on:
+       configserver:
+          condition: service_healthy
+  productservice:
+    image: 'shoaibpki/productservice:0.0.1'
+    container_name: productservice
+    ports:
+      - '8086:8086'
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://serviceregistry:8761/eureka
+      - CONFIG_SERVER_URL=http://host.docker.internal:9296
+      - DB_HOST=db
+    depends_on:
+      - db
+  orderservice:
+    image: 'shoaibpki/orderservice:0.0.1'
+    container_name: orderservice
+    ports:
+      - '8082:8082'
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://serviceregistry:8761/eureka
+      - CONFIG_SERVER_URL=http://host.docker.internal:9296
+      - DB_HOST=db
+    depends_on:
+      - db
+  paymentservice:
+    image: 'shoaibpki/paymentservice:0.0.1'
+    container_name: paymentservice
+    ports:
+      - '8081:8081'
+    environment:
+      - EUREKA_SERVER_ADDRESS=http://serviceregistry:8761/eureka
+      - CONFIG_SERVER_URL=http://host.docker.internal:9296
+      - DB_HOST=db
+    depends_on:
+      - db
+  db:
+    image: 'mysql:8.0.31'
+    restart: always
+    ports:
+      - '3307:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=root

@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-gatewy-app
+spec:
+  selector:
+    matchLabels:
+      app: cloud-gatewy-app
+  template:
+    metadata:
+      labels:
+        app: cloud-gatewy-app
+    spec:
+      containers:
+      - name: cloud-gatewy-app
+        image: shoaibpki/cloudgateway
+        ports:
+        - containerPort: 9090
+        env:
+          - name: CONFIG_SERVER_URL
+            valueFrom:
+              configMapKeyRef:
+                key: config_url
+                name: config-cm
+          # - name: EUREKA_SERVER_ADDRESS
+          #   valueFrom:
+          #     configMapKeyRef:
+          #       key: eureka_service_address
+          #       name: eureka-cm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloud-gateway-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: cloud-gatewy-app
+  ports:
+  - port: 80
+    targetPort: 9090

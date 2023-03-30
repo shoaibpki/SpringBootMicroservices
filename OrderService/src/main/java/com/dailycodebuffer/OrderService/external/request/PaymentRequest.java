@@ -1,0 +1,17 @@
+package com.dailycodebuffer.OrderService.external.request;
+
+import com.dailycodebuffer.OrderService.model.PaymentMode;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PaymentRequest {
+
+    private long orderId;
+    private long amount;
+    private String referenceNumber;
+    private PaymentMode paymentMode;
+}
