@@ -15,22 +15,21 @@ public class WebSecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests(authorizeRequests -> authorizeRequests
+                        .antMatchers("/payment/**")
+                        .hasAuthority("SCOPE_internal")
+                        .anyRequest()
+                        .authenticated())
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
         // http
-        //         .authorizeRequests(authorizeRequests ->
-        //                 authorizeRequests
-        //                         .antMatchers("/payment/**")
-        //                         .hasAuthority("SCOPE_internal")
-        //                         .anyRequest()
-        //                         .authenticated())
-        //         .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt);
-        http 
-            .authorizeRequests()
-            .anyRequest()
-            .authenticated()
-            .and()
-            .oauth2ResourceServer()
-            .jwt();
-    
+        // .authorizeRequests()
+        // .anyRequest()
+        // .authenticated()
+        // .and()
+        // .oauth2ResourceServer()
+        // .jwt();
+
         return http.build();
     }
 }
